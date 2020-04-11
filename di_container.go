@@ -6,11 +6,17 @@ import (
 	"reflect"
 )
 
+type DiContainer interface {
+	AddToDependencies(dependency interface{}) error
+	InjecWithDepedencies(object interface{}) error
+}
+
 type diContainer struct {
 	dependencies []interface{}
 }
+
 /* NewDiContainer returns a container for your dependencies */
-func NewDiContainer() *diContainer {
+func NewDiContainer() DiContainer {
 	return &diContainer{
 		dependencies: []interface{}{},
 	}
@@ -18,7 +24,7 @@ func NewDiContainer() *diContainer {
 
 /* AddToDependencies lets you add dependencies to your container. To match a dependency to a field on the struct, the
 dependency must ether implement the interface specified on the field or be the exact type as the field element */
-func (dc *diContainer) AddToDependencies(dependency interface{}) error{
+func (dc *diContainer) AddToDependencies(dependency interface{}) error {
 	err := validateDependency(dependency)
 	if err != nil {
 		return errors.New("Cannot add the dependency " + fmt.Sprint(dependency) + "because " + err.Error())
@@ -28,7 +34,7 @@ func (dc *diContainer) AddToDependencies(dependency interface{}) error{
 }
 
 /* InjecWithDepedencies receives a pointer to the object you want to inject with dependencies */
-func (dc *diContainer) InjecWithDepedencies(object interface{}) error{
+func (dc *diContainer) InjecWithDepedencies(object interface{}) error {
 	err := validateObject()
 	if err != nil {
 		return err
@@ -49,11 +55,11 @@ func (dc *diContainer) InjecWithDepedencies(object interface{}) error{
 				result = errors.New("Cannot inject into interface{}")
 				return
 			}
-			if t.Tag.Get("inject")=="auto"{
+			if t.Tag.Get("inject") == "auto" {
 				injectOk := false
 				for _, dependency := range dc.dependencies {
 					if f.Kind() == reflect.Interface && reflect.TypeOf(dependency).Implements(f.Type()) ||
-						reflect.TypeOf(dependency) == f.Type(){
+						reflect.TypeOf(dependency) == f.Type() {
 						value := reflect.ValueOf(dependency)
 						f.Set(value)
 						injectOk = true
@@ -75,16 +81,16 @@ func (dc *diContainer) InjecWithDepedencies(object interface{}) error{
 /* Basic validation over the object that will receive the dependencies */
 func validateObject() error {
 	/*
-	TODO: Validate if fields are exported to deliver a more specific error message
-	TODO: Validate if more than one dependency can be injected into one field
+		TODO: Validate if fields are exported to deliver a more specific error message
+		TODO: Validate if more than one dependency can be injected into one field
 	*/
 	return nil
 }
 
 /* Basic validation over the dependency */
-func validateDependency(dependency interface{}) error  {
+func validateDependency(dependency interface{}) error {
 	dType := reflect.TypeOf(dependency)
-	if dType == nil{
+	if dType == nil {
 		return errors.New("dependency type cannot be nil")
 	}
 	return nil
