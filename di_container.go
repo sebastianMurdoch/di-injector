@@ -9,13 +9,15 @@ import (
 type diContainer struct {
 	dependencies []interface{}
 }
-
+/* NewDiContainer returns a container for your dependencies */
 func NewDiContainer() *diContainer {
 	return &diContainer{
 		dependencies: []interface{}{},
 	}
 }
 
+/* AddToDependencies lets you add dependencies to your container. To match a dependency to a field on the struct, the
+dependency must ether implement the interface specified on the field or be the exact type as the field element */
 func (dc *diContainer) AddToDependencies(dependency interface{}) error{
 	err := validateDependency(dependency)
 	if err != nil {
@@ -25,6 +27,7 @@ func (dc *diContainer) AddToDependencies(dependency interface{}) error{
 	return nil
 }
 
+/* InjecWithDepedencies receives a pointer to the object you want to inject with dependencies */
 func (dc *diContainer) InjecWithDepedencies(object interface{}) error{
 	err := validateObject()
 	if err != nil {
@@ -69,6 +72,7 @@ func (dc *diContainer) InjecWithDepedencies(object interface{}) error{
 	return result
 }
 
+/* Basic validation over the object that will receive the dependencies */
 func validateObject() error {
 	/*
 	TODO: Validate if fields are exported to deliver a more specific error message
