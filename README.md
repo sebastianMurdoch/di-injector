@@ -20,7 +20,7 @@ package main
 
 import (
 	"fmt"
-	go_inject "github.com/sebastianMurdoch/di-injector"
+	di_injector "github.com/sebastianMurdoch/di-injector"
 )
 
 func main() {
