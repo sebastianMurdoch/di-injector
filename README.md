@@ -25,7 +25,7 @@ import (
 
 func main() {
 	/* Create a container */
-	c := go_inject.NewDiContainer()
+	c := di_injector.NewDiContainer()
 	/* Add your dependencies */
 	c.AddToDependencies(" Of course")
 	c.AddToDependencies(&ServiceImpl{})
