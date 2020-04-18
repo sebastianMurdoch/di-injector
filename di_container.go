@@ -26,6 +26,11 @@ func NewDiContainer() DiContainer {
 dependency must ether implement the interface specified on the field or be the exact type as the field element */
 func (dc *diContainer) AddToDependencies(dependencies ...interface{}) error {
 	for _, dependency := range dependencies {
+
+		// Skip nil dependency
+		if reflect.TypeOf(dependency) == nil {
+			continue
+		}
 		err := validateDependency(dependency)
 		if err != nil {
 			return errors.New("Cannot add the dependency " + fmt.Sprint(dependency) + "because " + err.Error())
@@ -68,10 +73,9 @@ func validateObject(object interface{}) error {
 
 /* Basic validation over the dependency */
 func validateDependency(dependency interface{}) error {
-	dType := reflect.TypeOf(dependency)
-	if dType == nil {
-		return errors.New("dependency type cannot be nil")
-	}
+	/*
+		TODO: Add validations
+	*/
 	return nil
 }
 

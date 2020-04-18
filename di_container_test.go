@@ -59,16 +59,6 @@ func TestDiContainer_InjectWithDependencies_NoInjections(t *testing.T) {
 }
 
 /*
-Tests that nil dependencies cannot be injected
-*/
-func TestNewDiContainer_NilDependency(t *testing.T) {
-	assert := assert.New(t)
-	c := NewDiContainer()
-	err := c.AddToDependencies(nil)
-	assert.NotNil(err)
-}
-
-/*
 Checks that any of the fields to be injected couldn't be interface{}. This kind of fields implement every dependency so
 this is not allowed
 */
