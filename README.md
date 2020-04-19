@@ -31,7 +31,7 @@ func main() {
 	c.AddToDependencies(&ServiceImpl{})
 	/* Inject your dependencies */
 	bo := businessObject{}
-	c.InjecWithDepedencies(&bo)
+	c.InjectWithDependencies(&bo)
 	fmt.Println(bo.SomeService.doService() + bo.CommonString)
 }
 
