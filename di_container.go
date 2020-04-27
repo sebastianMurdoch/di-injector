@@ -3,6 +3,7 @@ package di_injector
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -109,7 +110,8 @@ func injectObjectWithDependencies(object interface{}, dependencies []interface{}
 				}
 			}
 			if !injectOk {
-				return errors.New("No dependency injected on field " + t.Name)
+				// Log warning
+				log.Println("Warning: No dependencies injected")
 			}
 		}
 	}
