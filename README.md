@@ -50,6 +50,9 @@ func (s *ServiceImpl) doService() string {
 	return "Can this library be more useless?"
 }
 ```
+To see a more usefull example please check out this [post](https://medium.com/@sebastianmurdoch12/building-a-golang-development-framework-for-heroku-with-dependency-injection-2e1d3743779e?sk=64b15f4122699eeb386bee305ed34107)
+
+Comments and PRs of any kind are welcome!! Thanks
 
 # Questions?
 #### [Sebastian Murdoch](https://github.com/sebastianMurdoch) - sebastianmurdoch12@gmail.com
