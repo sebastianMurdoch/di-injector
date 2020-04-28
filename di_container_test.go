@@ -55,7 +55,7 @@ func TestDiContainer_InjectWithDependencies_NoInjections(t *testing.T) {
 	c := NewDiContainer()
 	a := A{Dependency0:str}
 	err := c.InjectWithDependencies(&a)
-	assert.Equal(err.Error(), "No dependency injected on field Dependency1")
+	assert.Nil(err)
 }
 
 /*
@@ -119,7 +119,22 @@ func TestDiContainer_InjectWithDependencies_recursionError(t *testing.T) {
 		return
 	}
 	err = c.InjectWithDependencies(&a)
-	assert.NotNil(err)
+	assert.Nil(err)
+}
+
+/*
+Checks replace capability
+*/
+func TestNewDiContainer_InjectWithDependencies_replace(t *testing.T) {
+	assert := assert.New(t)
+	c := NewDiContainer()
+	err := c.AddToDependencies("string1", "string2")
+	if err != nil {
+		t.Fail()
+	}
+	obj := C{}
+	c.InjectWithDependencies(&obj)
+	assert.Equal(obj.Dependency0, "string2")
 }
 
 
