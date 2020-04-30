@@ -26,27 +26,32 @@ func NewDiContainer() DiContainer {
 /* AddToDependencies lets you add dependencies to your container. To match a dependency to a field on the struct, the
 dependency must ether implement the interface specified on the field or be the exact type as the field element */
 func (dc *diContainer) AddToDependencies(dependencies ...interface{}) error {
-	types := map[reflect.Type]int{}
 	for _, dependency := range dependencies {
 		err := validateDependency(dependency)
 		if err != nil {
 			return errors.New("Cannot add the dependency " + fmt.Sprint(dependency) + "because " + err.Error())
 		}
-
 		// Skip nil dependency
 		if reflect.TypeOf(dependency) == nil {
 			continue
 		}
-
-		if index, ok := types[reflect.TypeOf(dependency)]; ok{
-			dc.dependencies[index] = dependency
-			continue
-		} else {
-			types[reflect.TypeOf(dependency)]=len(dc.dependencies)
-		}
-
 		dc.dependencies = append(dc.dependencies, dependency)
 	}
+
+	// Removes duplicates types keeping the last insert
+	types := map[reflect.Type]int{}
+	for i, d := range dc.dependencies {
+		if index_e, ok := types[reflect.TypeOf(d)]; ok{
+			// Erase element index_e
+			dc.dependencies[index_e] = dc.dependencies[len(dc.dependencies)-1]
+			dc.dependencies[len(dc.dependencies)-1] = nil
+			dc.dependencies = dc.dependencies[:len(dc.dependencies)-1]
+			continue
+		} else {
+			types[reflect.TypeOf(d)]=i
+		}
+	}
+
 	return nil
 }
 
