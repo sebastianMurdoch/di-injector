@@ -43,7 +43,8 @@ func (dc *diContainer) AddToDependencies(dependencies ...interface{}) error {
 	for i, d := range dc.dependencies {
 		if index_e, ok := types[reflect.TypeOf(d)]; ok{
 			// Erase element index_e
-			dc.dependencies[index_e] = dc.dependencies[len(dc.dependencies)-1]
+			dc.dependencies[index_e] = dc.dependencies[i]
+			dc.dependencies[i] = dc.dependencies[len(dc.dependencies)-1]
 			dc.dependencies[len(dc.dependencies)-1] = nil
 			dc.dependencies = dc.dependencies[:len(dc.dependencies)-1]
 			continue
