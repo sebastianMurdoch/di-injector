@@ -1,9 +1,7 @@
 package di_injector
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"reflect"
 )
 
@@ -29,7 +27,7 @@ func (dc *diContainer) AddToDependencies(dependencies ...interface{}) error {
 	for _, dependency := range dependencies {
 		err := validateDependency(dependency)
 		if err != nil {
-			return errors.New("Cannot add the dependency " + fmt.Sprint(dependency) + "because " + err.Error())
+			return DiError(ErrAddDependency,fmt.Sprint(dependency),err.Error())
 		}
 		// Skip nil dependency
 		if reflect.TypeOf(dependency) == nil {
@@ -66,7 +64,7 @@ func (dc *diContainer) InjectWithDependencies(object interface{}) error {
 	f := func() {
 		defer func() {
 			if err := recover(); err != nil {
-				result = errors.New("Fatal Error at Injection")
+				result = DiError(ErrAtInjection)
 			}
 		}()
 		err := injectObjectWithDependencies(object, dc.dependencies)
@@ -102,7 +100,7 @@ func injectObjectWithDependencies(object interface{}, dependencies []interface{}
 		f := obj.Field(i)
 		t := typ.Field(i)
 		if t.Type.Kind() == reflect.Interface && t.Type.Name() == "" {
-			return errors.New("Cannot inject into interface{}")
+			return DiError(ErrInjectInterface)
 		}
 		if t.Tag.Get("inject") == "auto" {
 			injectOk := false
@@ -114,7 +112,7 @@ func injectObjectWithDependencies(object interface{}, dependencies []interface{}
 					if needsInjection(dependency){
 						err := injectObjectWithDependencies(dependency, dependencies)
 						if err != nil {
-							return errors.New("Coudnt inject inner dependency -- " + err.Error())
+							return DiError(ErrInjectInner,err.Error())
 						}
 					}
 
@@ -125,8 +123,8 @@ func injectObjectWithDependencies(object interface{}, dependencies []interface{}
 				}
 			}
 			if !injectOk {
-				// Log warning
-				log.Println("Warning: No dependencies injected")
+				// Stop Injector
+				DiFatal(ErrFoundImplementation, t.Name)
 			}
 		}
 	}
