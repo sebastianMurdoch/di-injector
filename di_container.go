@@ -2,6 +2,7 @@ package di_injector
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 )
 
@@ -11,12 +12,14 @@ type DiContainer interface {
 }
 
 type diContainer struct {
+	strictMode   bool
 	dependencies []interface{}
 }
 
 /* NewDiContainer returns an empty container for your dependencies */
-func NewDiContainer() DiContainer {
+func NewDiContainer(StrictMode bool) DiContainer {
 	return &diContainer{
+		strictMode:   StrictMode,
 		dependencies: []interface{}{},
 	}
 }
@@ -27,7 +30,7 @@ func (dc *diContainer) AddToDependencies(dependencies ...interface{}) error {
 	for _, dependency := range dependencies {
 		err := validateDependency(dependency)
 		if err != nil {
-			return DiError(ErrAddDependency,fmt.Sprint(dependency),err.Error())
+			return DiError(ErrAddDependency, fmt.Sprint(dependency), err.Error())
 		}
 		// Skip nil dependency
 		if reflect.TypeOf(dependency) == nil {
@@ -39,7 +42,7 @@ func (dc *diContainer) AddToDependencies(dependencies ...interface{}) error {
 	// Removes duplicates types keeping the last insert
 	types := map[reflect.Type]int{}
 	for i, d := range dc.dependencies {
-		if index_e, ok := types[reflect.TypeOf(d)]; ok{
+		if index_e, ok := types[reflect.TypeOf(d)]; ok {
 			// Erase element index_e
 			dc.dependencies[index_e] = dc.dependencies[i]
 			dc.dependencies[i] = dc.dependencies[len(dc.dependencies)-1]
@@ -47,7 +50,7 @@ func (dc *diContainer) AddToDependencies(dependencies ...interface{}) error {
 			dc.dependencies = dc.dependencies[:len(dc.dependencies)-1]
 			continue
 		} else {
-			types[reflect.TypeOf(d)]=i
+			types[reflect.TypeOf(d)] = i
 		}
 	}
 
@@ -67,7 +70,7 @@ func (dc *diContainer) InjectWithDependencies(object interface{}) error {
 				result = DiError(ErrAtInjection)
 			}
 		}()
-		err := injectObjectWithDependencies(object, dc.dependencies)
+		err := injectObjectWithDependencies(object, dc.dependencies, dc.strictMode)
 		if err != nil {
 			result = err
 		}
@@ -93,7 +96,7 @@ func validateDependency(dependency interface{}) error {
 	return nil
 }
 
-func injectObjectWithDependencies(object interface{}, dependencies []interface{}) error {
+func injectObjectWithDependencies(object interface{}, dependencies []interface{}, strictMode bool) error {
 	obj := reflect.ValueOf(object).Elem()
 	typ := reflect.TypeOf(object).Elem()
 	for i := 0; i < obj.NumField(); i++ {
@@ -109,10 +112,10 @@ func injectObjectWithDependencies(object interface{}, dependencies []interface{}
 					reflect.TypeOf(dependency) == f.Type() {
 
 					// Add recursive injection
-					if needsInjection(dependency){
-						err := injectObjectWithDependencies(dependency, dependencies)
+					if needsInjection(dependency) {
+						err := injectObjectWithDependencies(dependency, dependencies, strictMode)
 						if err != nil {
-							return DiError(ErrInjectInner,err.Error())
+							return DiError(ErrInjectInner, err.Error())
 						}
 					}
 
@@ -123,8 +126,10 @@ func injectObjectWithDependencies(object interface{}, dependencies []interface{}
 				}
 			}
 			if !injectOk {
-				// Stop Injector
-				DiFatal(ErrFoundImplementation, t.Name)
+				log.Println("Warning: No dependencies injected")
+				if strictMode {
+					DiFatal(ErrFoundImplementation, t.Name)
+				}
 			}
 		}
 	}
