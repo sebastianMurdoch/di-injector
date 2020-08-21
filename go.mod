@@ -1,4 +1,4 @@
-module github.com/sebastianMurdoch/di-injector
+module github.com/anannichurch/di-injector
 
 go 1.12
 
